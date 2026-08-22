@@ -1,0 +1,18 @@
+{
+  "name": "agroroot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AgroRoot — gasless USDT funding for verified farm plots (WDK / ERC-4337)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0"
+  }
+}

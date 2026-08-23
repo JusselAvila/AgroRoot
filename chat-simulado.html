@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgroRoot Bot — WhatsApp</title>
+  <!--
+    Persona C — chat simulado estático (sin backend, sin WDK, sin Twilio).
+    Abrir con doble clic en el navegador para grabar el video demo.
+  -->
+  <style>
+    :root {
+      --wa-bg: #e5ddd5;
+      --wa-panel: #efeae2;
+      --wa-header: #f0f2f5;
+      --wa-header-border: #d1d7db;
+      --wa-green: #00a884;
+      --wa-teal: #008069;
+      --wa-out: #d9fdd3;
+      --wa-in: #ffffff;
+      --wa-text: #111b21;
+      --wa-muted: #667781;
+      --wa-time: #667781;
+      --wa-check: #53bdeb;
+      --wa-app-bg: #d1d7db;
+      --wa-composer: #f0f2f5;
+      --wa-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: var(--wa-app-bg);
+      color: var(--wa-text);
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .wa-frame {
+      width: 100%;
+      max-width: 920px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: var(--wa-panel);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+      position: relative;
+    }
+
+    /* Barra verde superior estilo WhatsApp Web */
+    .wa-frame::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: var(--wa-teal);
+      z-index: 2;
+    }
+
+    header.wa-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 16px 10px;
+      background: var(--wa-header);
+      border-bottom: 1px solid var(--wa-header-border);
+      flex-shrink: 0;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #dfe5e7;
+      flex-shrink: 0;
+    }
+
+    .header-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .header-meta h1 {
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-meta p {
+      font-size: 13px;
+      color: var(--wa-muted);
+      margin-top: 2px;
+    }
+
+    .header-meta .online {
+      color: var(--wa-green);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 18px;
+      color: var(--wa-muted);
+    }
+
+    .header-actions svg {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+    }
+
+    .chat-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 6.5% 16px;
+      background-color: #e5ddd5;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%23c9c2b8' fill-opacity='0.18'%3E%3Cpath d='M0 40h20v2H0zM40 0v20h2V0zM60 40h20v2H60zM40 60v20h2V60z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .day-chip {
+      display: table;
+      margin: 8px auto 16px;
+      background: #ffffff;
+      color: var(--wa-muted);
+      font-size: 12.5px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      box-shadow: var(--wa-shadow);
+    }
+
+    .row {
+      display: flex;
+      margin-bottom: 4px;
+    }
+
+    .row.out {
+      justify-content: flex-end;
+    }
+
+    .row.in {
+      justify-content: flex-start;
+    }
+
+    .bubble {
+      max-width: min(75%, 460px);
+      border-radius: 8px;
+      padding: 6px 7px 4px;
+      box-shadow: var(--wa-shadow);
+      position: relative;
+    }
+
+    .row.out .bubble {
+      background: var(--wa-out);
+      border-top-right-radius: 0;
+    }
+
+    .row.in .bubble {
+      background: var(--wa-in);
+      border-top-left-radius: 0;
+    }
+
+    .bubble .caption {
+      font-size: 14.2px;
+      line-height: 1.4;
+      padding: 2px 4px 0;
+      white-space: pre-wrap;
+    }
+
+    .bubble .time {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 3px;
+      font-size: 11px;
+      color: var(--wa-time);
+      margin-top: 2px;
+      padding: 0 2px 1px;
+    }
+
+    .checks {
+      width: 16px;
+      height: 11px;
+    }
+
+    .photo-wrap {
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .photo-wrap img {
+      display: block;
+      width: 100%;
+      max-width: 280px;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+    }
+
+    .location-card {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+      padding: 8px;
+      background: rgba(17, 27, 33, 0.04);
+      border-radius: 6px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .map-thumb {
+      width: 56px;
+      height: 56px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      background:
+        linear-gradient(135deg, #b7e4c7 0%, #95d5b2 40%, #74c69d 100%);
+      position: relative;
+    }
+
+    .map-thumb::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 38%;
+      width: 14px;
+      height: 14px;
+      margin-left: -7px;
+      background: #e11d48;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    }
+
+    .loc-text strong {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+
+    .loc-text span {
+      display: block;
+      font-size: 12.5px;
+      color: var(--wa-muted);
+      margin-top: 2px;
+    }
+
+    .bubble a.tx-link {
+      color: #027eb5;
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .bubble a.tx-link:hover {
+      text-decoration: underline;
+    }
+
+    footer.wa-composer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px 10px;
+      background: var(--wa-composer);
+      flex-shrink: 0;
+    }
+
+    .composer-icon {
+      width: 24px;
+      height: 24px;
+      fill: var(--wa-muted);
+      flex-shrink: 0;
+    }
+
+    .composer-input {
+      flex: 1;
+      background: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 15px;
+      color: var(--wa-muted);
+    }
+
+    .mic {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--wa-green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .mic svg {
+      width: 20px;
+      height: 20px;
+      fill: #fff;
+    }
+
+    @media (max-width: 640px) {
+      .wa-frame {
+        max-width: 100%;
+      }
+
+      .chat-scroll {
+        padding: 10px 4% 14px;
+      }
+
+      .bubble {
+        max-width: 88%;
+      }
+
+      .header-actions .hide-sm {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wa-frame">
+    <header class="wa-header">
+      <svg class="composer-icon hide-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+      <!-- FOTO DE PERFIL DEL BOT: cambiar el src de la imagen de abajo -->
+      <img
+        class="avatar"
+        alt="AgroRoot Bot"
+        src="https://ui-avatars.com/api/?name=AgroRoot+Bot&background=008069&color=fff&bold=true&size=128"
+      />
+      <div class="header-meta">
+        <!-- NOMBRE DEL CONTACTO: cambiar el texto dentro de h1 -->
+        <h1>AgroRoot Bot</h1>
+        <!-- ESTADO EN LÍNEA: cambiar el texto dentro de este párrafo -->
+        <p class="online">en línea</p>
+      </div>
+      <div class="header-actions">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <svg class="hide-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+      </div>
+    </header>
+
+    <main class="chat-scroll">
+      <div class="day-chip">HOY</div>
+
+      <!-- ============================================================
+           MENSAJE 1 — AGRICULTOR (burbuja verde, derecha)
+           Editar: texto del caption, ubicación, teléfono, foto y hora.
+           ============================================================ -->
+      <div class="row out">
+        <div class="bubble">
+          <!-- FOTO DE PARCELA DE SOYA: cambiar el src de la imagen -->
+          <div class="photo-wrap">
+            <img
+              alt="Parcela de soya en Santa Cruz, Bolivia"
+              src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=800&q=80"
+            />
+          </div>
+
+          <!-- TEXTO DEL MENSAJE 1 (agricultor): cambiar el párrafo de abajo -->
+          <p class="caption">Les mando la foto de mi parcela de soya. Está en Santa Cruz, Bolivia.</p>
+
+          <!-- UBICACIÓN Y NÚMERO: cambiar ciudad, país y teléfono (+591 ficticio) -->
+          <div class="location-card">
+            <div class="map-thumb" aria-hidden="true"></div>
+            <div class="loc-text">
+              <strong>Santa Cruz, Bolivia</strong>
+              <span>+591 700 00 123</span>
+              <span>Ubicación compartida</span>
+            </div>
+          </div>
+
+          <!-- HORA DEL MENSAJE 1 -->
+          <div class="time">
+            09:14
+            <svg class="checks" viewBox="0 0 16 11" aria-hidden="true">
+              <path fill="#53bdeb" d="M11.07 0.6 6.2 6.2 4.3 4.3 3.1 5.5l3.1 3.1 6.1-7.0z"/>
+              <path fill="#53bdeb" d="M7.57 0.6 2.7 6.2 0.8 4.3 0 5.5l2.7 2.7 6.1-7.0z" opacity="0.9"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           MENSAJE 2 — BOT (burbuja blanca, izquierda)
+           Confirmación automática + PIV en estado Pending
+           ============================================================ -->
+      <div class="row in">
+        <div class="bubble">
+          <!-- TEXTO DEL MENSAJE 2 (bot): cambiar el párrafo de abajo -->
+          <p class="caption">Recibimos la foto de tu parcela. Registramos tu Punto de Impacto Verificado (PIV) con estado Pending. Ya está en el panel corporativo.</p>
+          <!-- HORA DEL MENSAJE 2 -->
+          <div class="time">09:14</div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           MENSAJE 3 — BOT (burbuja blanca, izquierda)
+           Pago 25 USDT, sin gas, hash simulado de Sepolia
+           ============================================================ -->
+      <div class="row in">
+        <div class="bubble">
+          <!-- TEXTO DEL MENSAJE 3 (bot): cambiar el párrafo de abajo.
+               El enlace de Etherscan se edita en el href y en el texto del <a>. -->
+          <p class="caption">¡Buenas noticias! Tu parcela fue financiada. Recibiste 25 USDT en tu Smart Account, sin comisiones de gas. Ver recibo: <a class="tx-link" href="https://sepolia.etherscan.io/tx/0x7c3a9e2f1b84d0a6c5e8f4412ab90de17c6f33a81b29e04d55c1a0e8b7d24691" target="_blank" rel="noopener noreferrer">0x7c3a9e2f1b84d0a6c5e8f4412ab90de17c6f33a81b29e04d55c1a0e8b7d24691</a></p>
+          <!-- HORA DEL MENSAJE 3 -->
+          <div class="time">09:21</div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="wa-composer">
+      <svg class="composer-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
+      <div class="composer-input">Escribe un mensaje</div>
+      <svg class="composer-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 7v2.99s-1.99.01-2 0V7h-3s.01-1.99 0-2h3V2h2v3h3v2h-3zm-3 4V8h-3V5H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-8h-3zM5 19l3-4 2 3 3-4 4 5H5z"/></svg>
+      <div class="mic" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15a.998.998 0 0 0-.98-.85c-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z"/></svg>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

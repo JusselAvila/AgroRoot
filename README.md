@@ -287,19 +287,22 @@ pending ──► funding ──► funded          (confirmed on chain)
 
 ### Executed gasless payouts
 
-Two farmers onboarded through Telegram, two payouts settled on chain. Neither farmer installed a wallet, held a key, or acquired a native token.
+Two farmers onboarded through Telegram, three payouts settled on chain. Neither farmer installed a wallet, held a key, or acquired a native token.
 
 | PIV | Amount | Gas paid in USD₮ | Transaction |
 | --- | --- | --- | --- |
 | #1 | 25 USD₮ | 1.222428 | [`0x28277170…983f3eee`](https://sepolia.etherscan.io/tx/0x2827717048dafd8398498c8dbc96f06a5e2c60a95c7927fc105be6b2983f3eee) — block `11549239` |
 | #3 | 25 USD₮ | 1.270396 | [`0x2584bd0e…fe9d1f40`](https://sepolia.etherscan.io/tx/0x2584bd0e08c23380cbc3562af7bac0d6b207e3f5ee702b4eb022b65efe9d1f40) |
+| #4 | 25 USD₮ | 1.217926 | [`0x06cad040…6d86e875`](https://sepolia.etherscan.io/tx/0x06cad0407473a1487199c8a2e832e78ee1f043dc0c27e739a8a0c6b16d86e875) |
+
+75 USD₮ delivered for **3.71 USD₮ of gas — all of it denominated and settled in USD₮**, none of it paid by a farmer.
 
 ### The proof, in balances
 
 | Account | Address | USD₮ | **Native ETH** |
 | --- | --- | ---: | ---: |
-| Treasury | [`0xcb1Ace5D…FABbD72`](https://sepolia.etherscan.io/address/0xcb1Ace5D6cc081Aa441303938F68291B2FABbD72) | 41.52 | **0** |
-| Farmer 1 | [`0xB70F090E…538b31B5`](https://sepolia.etherscan.io/address/0xB70F090Ef693F34D3Cefb3b040BDCFa7538b31B5) | 26.00 | **0** |
+| Treasury | [`0xcb1Ace5D…FABbD72`](https://sepolia.etherscan.io/address/0xcb1Ace5D6cc081Aa441303938F68291B2FABbD72) | 15.95 | **0** |
+| Farmer 1 | [`0xB70F090E…538b31B5`](https://sepolia.etherscan.io/address/0xB70F090Ef693F34D3Cefb3b040BDCFa7538b31B5) | 51.00 | **0** |
 | Farmer 2 | [`0x281DF968…c873Bf83`](https://sepolia.etherscan.io/address/0x281DF96879E06f2CB100Cd4a061C5E54c873Bf83) | 25.00 | **0** |
 
 Both farmers hold USD₮ and **zero native ETH**. They were paid without ever acquiring, holding, or spending the network's gas token — which is the entire claim of this build, stated as a number rather than a promise. The treasury holds no ETH either: the paymaster fronted the gas and was reimbursed in USD₮.

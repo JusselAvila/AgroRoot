@@ -1,5 +1,6 @@
 require("dotenv").config();
 
+const path = require("node:path");
 const express = require("express");
 const { connect, listTables, getDatabasePath } = require("./db");
 const pivsRouter = require("./routes/pivs");
@@ -9,6 +10,9 @@ const PORT = Number(process.env.PORT) || 3000;
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Dashboard corporativo (Persona C)
+app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.get("/health", (_req, res) => {
   try {

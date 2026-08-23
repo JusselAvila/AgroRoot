@@ -13,9 +13,11 @@ const {
   setFarmerSmartAccount,
   getPivById,
   markPivFunding,
+  markPivSubmitted,
   markPivFunded,
   markPivFailed,
 } = require("../db/pivs");
+const { notificarPagoConfirmado } = require("./notifier");
 
 const USDT_DECIMALS = 6n;
 
@@ -207,6 +209,11 @@ async function sendFunding(pivId, amount) {
 
   markPivFunding(piv.id);
 
+  // Se llena en cuanto el bundler acepta la UserOperation. Si algo falla
+  // después de este punto, el PIV NO puede volver a 'failed': eso lo haría
+  // elegible para reintento y el agricultor cobraría dos veces.
+  let submittedHash = null;
+
   try {
     const result = await withWallet(async (wallet) => {
       const treasury = await wallet.getAccount(getTreasuryAccountIndex());
@@ -231,11 +238,35 @@ async function sendFunding(pivId, amount) {
         amount: amountUnits,
       });
 
+      // El bundler aceptar la UserOperation no significa que se ejecutó: puede
+      // revertir en cadena o ser descartada. Guardamos el hash primero (para no
+      // perderlo) y recién después esperamos el resultado real.
+      submittedHash = transfer.hash;
+      markPivSubmitted(piv.id, transfer.hash);
+
+      const receipt = await treasury.waitForTransaction(transfer.hash, {
+        target: "confirmed",
+      });
+
+      if (receipt.finality === "dropped") {
+        throw new Error(
+          `UserOperation ${transfer.hash} was dropped before landing on chain.`,
+        );
+      }
+
+      if (receipt.success === false) {
+        throw new Error(
+          `UserOperation ${transfer.hash} reverted on chain (block ${receipt.block ?? "?"}).`,
+        );
+      }
+
       return {
         txHash: transfer.hash,
         feeUnits: transfer.fee.toString(),
         feeUsdt: formatUsdt(transfer.fee),
         treasuryAddress,
+        finality: receipt.finality,
+        block: receipt.block ?? null,
       };
     });
 
@@ -245,6 +276,19 @@ async function sendFunding(pivId, amount) {
       feeUsdt: result.feeUsdt,
     });
 
+    // Fase 4: avisar al agricultor por Telegram. El pago ya está confirmado
+    // on-chain, así que un fallo de mensajería no debe tumbar la respuesta.
+    let notified = false;
+    try {
+      await notificarPagoConfirmado(funded.farmer_phone, {
+        txHash: funded.tx_hash,
+        amountUsdt: funded.amount_usdt,
+      });
+      notified = true;
+    } catch (error) {
+      console.error(`[notifier] no se pudo avisar al PIV ${funded.id}:`, error.message);
+    }
+
     return {
       pivId: funded.id,
       status: funded.status,
@@ -253,10 +297,23 @@ async function sendFunding(pivId, amount) {
       feeUsdt: funded.fee_usdt,
       recipient,
       farmerId: accountInfo.farmerId,
+      finality: result.finality,
+      block: result.block,
+      notified,
       explorerUrl: `https://sepolia.etherscan.io/tx/${funded.tx_hash}`,
     };
   } catch (error) {
-    markPivFailed(piv.id, error.message || "funding failed");
+    if (submittedHash) {
+      // Ya salió una UserOperation. Queda en 'funding' con el hash guardado
+      // para que se resuelva a mano en el explorador; reintentar aquí sería
+      // arriesgar un pago doble.
+      error.message =
+        `${error.message} (UserOperation ${submittedHash} ya fue enviada; ` +
+        `el PIV queda en 'funding' para revisión manual, no se reintenta)`;
+      error.txHash = submittedHash;
+    } else {
+      markPivFailed(piv.id, error.message || "funding failed");
+    }
     throw error;
   }
 }

@@ -4,3 +4,7 @@ data/*.db
 data/*.db-journal
 *.log
 .DS_Store
+
+# Documentos internos del equipo (no forman parte de la entrega)
+RESUMEN_PROYECTO_1.md
+INSTRUCCIONES_PERSONA_A.pdf

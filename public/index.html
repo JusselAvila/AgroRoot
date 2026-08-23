@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgroRoot — Panel corporativo</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">🌱</span>
+      <div>
+        <h1>AgroRoot</h1>
+        <p>Panel de impacto corporativo</p>
+      </div>
+    </div>
+    <div class="network">
+      <span class="dot"></span>
+      Sepolia · USD₮ · gasless
+    </div>
+  </header>
+
+  <main>
+    <section class="stats" id="stats">
+      <div class="stat">
+        <span class="stat-label">PIV pendientes</span>
+        <strong class="stat-value" id="stat-pending">—</strong>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Precio por PIV</span>
+        <strong class="stat-value" id="stat-price">—</strong>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Comprados</span>
+        <strong class="stat-value" id="stat-funded">—</strong>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Total invertido</span>
+        <strong class="stat-value" id="stat-total">—</strong>
+      </div>
+    </section>
+
+    <div class="section-head">
+      <h2>Puntos de Impacto Verificados</h2>
+      <div class="filters" id="filters">
+        <button class="filter is-active" data-filter="pending">Pendientes</button>
+        <button class="filter" data-filter="funded">Comprados</button>
+        <button class="filter" data-filter="all">Todos</button>
+      </div>
+    </div>
+
+    <div id="feedback" class="feedback" hidden></div>
+    <div id="grid" class="grid">
+      <p class="empty">Cargando…</p>
+    </div>
+  </main>
+
+  <!-- Confirmación de compra: muestra la cotización de gas en USD₮ antes de pagar -->
+  <div class="modal-backdrop" id="modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <h3 id="modal-title">Confirmar compra de PIV</h3>
+      <p class="modal-sub" id="modal-sub"></p>
+
+      <dl class="quote">
+        <div>
+          <dt>Pago al agricultor</dt>
+          <dd id="quote-amount">—</dd>
+        </div>
+        <div>
+          <dt>Comisión de red (gas)</dt>
+          <dd id="quote-fee">calculando…</dd>
+        </div>
+        <div class="quote-total">
+          <dt>Total</dt>
+          <dd id="quote-total">—</dd>
+        </div>
+      </dl>
+
+      <p class="gasless-note">
+        El agricultor no paga gas ni necesita ETH: la comisión se cubre en USD₮ vía paymaster ERC-4337.
+      </p>
+
+      <div id="modal-error" class="modal-error" hidden></div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="btn-cancel">Cancelar</button>
+        <button class="btn btn-primary" id="btn-confirm">Confirmar y pagar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

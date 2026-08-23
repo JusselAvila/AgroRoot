@@ -11,6 +11,25 @@ function getDatabasePath() {
   return process.env.DATABASE_PATH || DEFAULT_DB_PATH;
 }
 
+function tableColumns(tableName) {
+  return getDb()
+    .prepare(`PRAGMA table_info(${tableName})`)
+    .all()
+    .map((row) => row.name);
+}
+
+function ensureColumn(tableName, columnName, definitionSql) {
+  const columns = tableColumns(tableName);
+  if (!columns.includes(columnName)) {
+    getDb().exec(`ALTER TABLE ${tableName} ADD COLUMN ${definitionSql}`);
+  }
+}
+
+function migrate() {
+  ensureColumn("Farmers", "smart_account_address", "smart_account_address TEXT");
+  ensureColumn("Impact_Points", "fee_usdt", "fee_usdt TEXT");
+}
+
 function connect() {
   if (db) {
     return db;
@@ -22,6 +41,7 @@ function connect() {
   db = new DatabaseSync(dbPath);
   db.exec("PRAGMA foreign_keys = ON;");
   db.exec(fs.readFileSync(SCHEMA_PATH, "utf8"));
+  migrate();
 
   return db;
 }

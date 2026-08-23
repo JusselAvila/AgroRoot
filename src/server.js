@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const express = require("express");
 const { connect, listTables, getDatabasePath } = require("./db");
+const pivsRouter = require("./routes/pivs");
 
 const PORT = Number(process.env.PORT) || 3000;
 
@@ -32,6 +33,17 @@ app.get("/health", (_req, res) => {
       },
     });
   }
+});
+
+app.use("/api/pivs", pivsRouter);
+
+app.use((error, _req, res, _next) => {
+  console.error("[api]", error);
+  const status = Number(error.statusCode) || 500;
+  res.status(status).json({
+    ok: false,
+    error: error.message || "Internal server error",
+  });
 });
 
 function start() {

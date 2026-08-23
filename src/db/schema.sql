@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS Farmers (
   name TEXT,
   phone TEXT NOT NULL UNIQUE,
   location TEXT,
+  smart_account_address TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -16,6 +17,7 @@ CREATE TABLE IF NOT EXISTS Impact_Points (
   status TEXT NOT NULL DEFAULT 'pending',
   tx_hash TEXT,
   amount_usdt TEXT,
+  fee_usdt TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (farmer_id) REFERENCES Farmers(id)

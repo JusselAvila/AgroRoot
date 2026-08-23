@@ -58,8 +58,8 @@ function formatUsdt(units, decimals = 6) {
 }
 
 function buildConfig() {
-  const transferMaxFee = BigInt(optionalEnv("TRANSFER_MAX_FEE", "100000"));
-  const transactionMaxFee = BigInt(optionalEnv("TRANSACTION_MAX_FEE", "100000"));
+  const transferMaxFee = BigInt(optionalEnv("TRANSFER_MAX_FEE", "5000000"));
+  const transactionMaxFee = BigInt(optionalEnv("TRANSACTION_MAX_FEE", "5000000"));
 
   return {
     chainId: Number(optionalEnv("CHAIN_ID", "11155111")),

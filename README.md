@@ -6,8 +6,7 @@ Built for the **WDK Gasless — Tether** track.
 
 ## Current status
 
-Express + SQLite are up. The isolated WDK script lives at `scripts/wdk-test.js` on `feature/wdk-core`. Do not integrate funding endpoints until that script prints a real Sepolia hash.
-
+Express + SQLite + isolated WDK script are up. Block 3 wires `wdkService.js` into `POST /api/pivs/fund/:pivId`.
 ## Run locally
 
 ```bash
@@ -29,6 +28,29 @@ npm run wdk:test
 ```
 
 Uses `@tetherto/wdk-wallet-evm-erc-4337@1.0.0-beta.16` (paymaster token mode on Sepolia). Success = a UserOperation hash in the terminal.
+
+## Funding API (Persona A — block 3)
+
+```bash
+# Create a pending PIV (no Twilio required)
+curl -sS -X POST http://localhost:3000/api/pivs \
+  -H 'content-type: application/json' \
+  -d '{"phone":"+59170000001","name":"Demo Farmer","location":"Santa Cruz"}'
+
+# Quote gas in USD₮
+curl -sS 'http://localhost:3000/api/pivs/quote?amount=1'
+
+# Fund PIV id 1 with 1 USD₮ (treasury smart account → farmer smart account)
+curl -sS -X POST http://localhost:3000/api/pivs/fund/1 \
+  -H 'content-type: application/json' \
+  -d '{"amount":"1"}'
+```
+
+Service contract in `src/services/wdkService.js`:
+
+- `createSmartAccountIfNeeded(phone)`
+- `getFeeQuote(amount)`
+- `sendFunding(pivId, amount)`
 
 ## Data model
 

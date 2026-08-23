@@ -6,7 +6,7 @@ Built for the **WDK Gasless — Tether** track.
 
 ## Current status
 
-The Express server and SQLite schema are up. Phase 3 (smart account → paymaster quote → UserOperation) is next and lives on `feature/wdk-core`.
+Express + SQLite are up. The isolated WDK script lives at `scripts/wdk-test.js` on `feature/wdk-core`. Do not integrate funding endpoints until that script prints a real Sepolia hash.
 
 ## Run locally
 
@@ -17,6 +17,18 @@ npm start
 ```
 
 Health check: [http://localhost:3000/health](http://localhost:3000/health)
+
+## WDK smoke test (Persona A — block 2)
+
+```bash
+# 1. Put SEED_PHRASE and TRANSFER_TO in .env (see .env.example)
+# 2. Fund the printed smart account with Sepolia USD₮:
+#    token 0xd077a400968890eacc75cdc901f0356c943e4fdb
+# 3. Run:
+npm run wdk:test
+```
+
+Uses `@tetherto/wdk-wallet-evm-erc-4337@1.0.0-beta.16` (paymaster token mode on Sepolia). Success = a UserOperation hash in the terminal.
 
 ## Data model
 

@@ -11,7 +11,7 @@ A farmer photographs their plot in a chat app. A company buys that proof of impa
 
 ## 🎥 Video demo
 
-▶️ _Paste the YouTube (unlisted) URL here after upload._
+▶️ (https://www.youtube.com/watch?v=ZIhIiJaOOWc)
 
 ---
 

@@ -1,0 +1,42 @@
+[
+  {
+    "phone_number": "+59170000123",
+    "farmer_name": "Rosa Mamani Quispe",
+    "location_department": "Santa Cruz",
+    "image_url": "parcela1.jpg",
+    "piv_status": "Pending",
+    "smart_account_address": null
+  },
+  {
+    "phone_number": "+59172145890",
+    "farmer_name": "Carlos Gutiérrez Rojas",
+    "location_department": "Cochabamba",
+    "image_url": "parcela2.jpg",
+    "piv_status": "Pending",
+    "smart_account_address": null
+  },
+  {
+    "phone_number": "+59176543210",
+    "farmer_name": "María Elena Condori",
+    "location_department": "La Paz",
+    "image_url": "parcela3.jpg",
+    "piv_status": "Pending",
+    "smart_account_address": null
+  },
+  {
+    "phone_number": "+59169874521",
+    "farmer_name": "José Luis Suárez Peña",
+    "location_department": "Beni",
+    "image_url": "parcela4.jpg",
+    "piv_status": "Pending",
+    "smart_account_address": null
+  },
+  {
+    "phone_number": "+59173412088",
+    "farmer_name": "Ana Patricia Flores Choque",
+    "location_department": "Santa Cruz",
+    "image_url": "parcela5.jpg",
+    "piv_status": "Pending",
+    "smart_account_address": null
+  }
+]
